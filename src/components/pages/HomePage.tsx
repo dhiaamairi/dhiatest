@@ -187,7 +187,7 @@ export default function HomePage() {
         {/* Bottom Half: Immersive Image */}
         <div className="relative w-full h-[55vh] overflow-hidden">
           <ParallaxImage 
-            src="https://static.wixstatic.com/media/12d367_71ebdd7141d041e4be3d91d80d4578dd~mv2.png?id=hero-table-setting"
+            src="https://static.wixstatic.com/media/65c5e7_652083c1798e46619583ae38f37f82a9~mv2.png?originWidth=1280&originHeight=704"
             alt="Artisanal table setting with pears and ceramics"
             className="w-full h-full"
           />
@@ -465,7 +465,7 @@ export default function HomePage() {
       {/* --- VISUAL BREATHER: Full Bleed Image --- */}
       <section className="relative w-full h-[80vh] overflow-hidden">
         <ParallaxImage 
-          src="https://static.wixstatic.com/media/12d367_71ebdd7141d041e4be3d91d80d4578dd~mv2.png?id=breather-texture"
+          src="https://static.wixstatic.com/media/65c5e7_fd3eb7f8489c43d19efcb52c6254d5ee~mv2.png?originWidth=1920&originHeight=1280"
           alt="Abstract texture of natural materials"
           className="w-full h-full"
         />

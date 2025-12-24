@@ -3,3 +3,11 @@
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
+
+@layer base {
+  :root {
+    --shadow-lg: 0 40px 95px -45px rgba(15, 23, 42, 0.35);
+    --shadow-md: 0 24px 60px -32px rgba(15, 23, 42, 0.28);
+    --shadow-sm: 0 18px 40px -28px rgba(15, 23, 42, 0.2);
+  }
+}
