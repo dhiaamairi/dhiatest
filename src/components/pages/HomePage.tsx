@@ -1,100 +1,14 @@
-// HPI 1.6-V
-import React, { useState, useEffect, useRef, useMemo } from 'react';
-import { motion, AnimatePresence, useScroll, useTransform, useSpring } from 'framer-motion';
+import React, { useState, useEffect, useMemo } from 'react';
+import { motion, AnimatePresence } from 'framer-motion';
 import { BaseCrudService } from '@/integrations';
 import { OnlineStores } from '@/entities';
 import Header from '@/components/Header';
 import Footer from '@/components/Footer';
-import { Image } from '@/components/ui/image';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Badge } from '@/components/ui/badge';
-import { Search, Globe, ShoppingBag, MapPin, ExternalLink, ArrowRight, Star, Filter, X } from 'lucide-react';
-
-// --- Utility Components for Animation & Layout ---
-
-// Intersection Observer Component for Scroll Reveals
-const AnimatedReveal = ({ children, className, delay = 0 }: { children: React.ReactNode; className?: string; delay?: number }) => {
-  const ref = useRef<HTMLDivElement>(null);
-  const [isVisible, setIsVisible] = useState(false);
-
-  useEffect(() => {
-    const element = ref.current;
-    if (!element) return;
-
-    const observer = new IntersectionObserver(
-      ([entry]) => {
-        if (entry.isIntersecting) {
-          setIsVisible(true);
-          observer.unobserve(element);
-        }
-      },
-      { threshold: 0.1, rootMargin: '0px 0px -50px 0px' }
-    );
-
-    observer.observe(element);
-    return () => observer.disconnect();
-  }, []);
-
-  return (
-    <div
-      ref={ref}
-      className={`transition-all duration-1000 ease-out ${className || ''}`}
-      style={{
-        opacity: isVisible ? 1 : 0,
-        transform: isVisible ? 'translateY(0)' : 'translateY(40px)',
-        transitionDelay: `${delay}ms`,
-      }}
-    >
-      {children}
-    </div>
-  );
-};
-
-// Parallax Image Component
-const ParallaxImage = ({ src, alt, className }: { src: string; alt: string; className?: string }) => {
-  const ref = useRef<HTMLDivElement>(null);
-  const { scrollYProgress } = useScroll({
-    target: ref,
-    offset: ["start end", "end start"]
-  });
-  
-  const y = useTransform(scrollYProgress, [0, 1], ["-10%", "10%"]);
-  const scale = useTransform(scrollYProgress, [0, 1], [1.1, 1.15]);
-
-  return (
-    <div ref={ref} className={`overflow-hidden ${className}`}>
-      <motion.div style={{ y, scale }} className="w-full h-full">
-        <Image
-          src={src}
-          alt={alt}
-          width={1600}
-          className="w-full h-full object-cover"
-        />
-      </motion.div>
-    </div>
-  );
-};
-
-// Marquee Component
-const Marquee = ({ text }: { text: string }) => {
-  return (
-    <div className="w-full overflow-hidden bg-primary py-4 border-y border-secondary/20">
-      <motion.div
-        className="whitespace-nowrap flex gap-8"
-        animate={{ x: [0, -1000] }}
-        transition={{ repeat: Infinity, duration: 30, ease: "linear" }}
-      >
-        {[...Array(10)].map((_, i) => (
-          <span key={i} className="text-primary-foreground font-heading text-2xl tracking-widest uppercase opacity-80">
-            {text} <span className="mx-4 text-secondary">•</span>
-          </span>
-        ))}
-      </motion.div>
-    </div>
-  );
-};
+import { Search, Globe, MapPin, ExternalLink, ArrowRight, Filter, X, Check } from 'lucide-react';
 
 // --- Main Page Component ---
 
@@ -155,330 +69,192 @@ export default function HomePage() {
   const countries = useMemo(() => Array.from(new Set(stores.map(s => s.countryOfOrigin).filter(Boolean))), [stores]);
   const featuredStores = useMemo(() => stores.slice(0, 3), [stores]); // Use first 3 as featured
 
-  // Scroll Progress for Hero
-  const { scrollY } = useScroll();
-  const heroTextY = useTransform(scrollY, [0, 500], [0, 200]);
-  const heroOpacity = useTransform(scrollY, [0, 300], [1, 0]);
-
   return (
     <div className="min-h-screen bg-background text-foreground font-paragraph selection:bg-primary selection:text-primary-foreground overflow-x-clip">
       <Header />
 
-      {/* --- HERO SECTION: Split Layout (Inspiration Image Replication) --- */}
-      <section className="relative w-full min-h-screen flex flex-col">
-        {/* Top Half: Typography & Brand */}
-        <div className="relative w-full h-[45vh] bg-background flex flex-col items-center justify-center px-6 z-10">
-          <motion.div 
-            style={{ y: heroTextY, opacity: heroOpacity }}
-            className="text-center max-w-[100rem]"
-          >
-            <span className="block font-paragraph text-primary/60 tracking-[0.3em] text-sm uppercase mb-4">
-              Est. 2024 • Global Collection
-            </span>
-            <h1 className="font-heading text-[12vw] lg:text-[10rem] leading-[0.8] text-primary mb-2 tracking-tighter">
-              CRAFTICO
+      {/* --- HERO SECTION: Simple Form & Title --- */}
+      <section className="relative w-full py-20 px-6 lg:px-12 bg-gradient-to-br from-primary/5 to-secondary/5">
+        <div className="max-w-[100rem] mx-auto">
+          <div className="text-center mb-12">
+            <h1 className="font-heading text-5xl lg:text-7xl text-primary mb-4 tracking-tight">
+              Global Store Directory
             </h1>
-            <p className="font-heading text-2xl lg:text-4xl text-primary/80 italic font-light mt-4">
-              Artisanal Touches for Your Living Space
+            <p className="font-paragraph text-lg text-foreground/70 max-w-2xl mx-auto">
+              Discover and explore exceptional online retailers from around the world. Filter by category, country, and search for exactly what you need.
             </p>
-          </motion.div>
-        </div>
-
-        {/* Bottom Half: Immersive Image */}
-        <div className="relative w-full h-[55vh] overflow-hidden">
-          <ParallaxImage 
-            src="https://static.wixstatic.com/media/65c5e7_652083c1798e46619583ae38f37f82a9~mv2.png?originWidth=1280&originHeight=704"
-            alt="Artisanal table setting with pears and ceramics"
-            className="w-full h-full"
-          />
-          
-          {/* Floating CTA */}
-          <div className="absolute bottom-12 right-6 lg:right-12 z-20">
-             <Button 
-                onClick={() => document.getElementById('collection')?.scrollIntoView({ behavior: 'smooth' })}
-                className="bg-background/90 backdrop-blur-sm text-primary hover:bg-primary hover:text-primary-foreground border border-primary/20 rounded-full px-8 py-8 text-lg transition-all duration-500 shadow-2xl group"
-              >
-                Explore Collection
-                <ArrowRight className="ml-2 w-5 h-5 group-hover:translate-x-1 transition-transform" />
-              </Button>
-          </div>
-        </div>
-      </section>
-
-      {/* --- NARRATIVE SECTION: Editorial Layout --- */}
-      <section className="py-32 px-6 lg:px-12 max-w-[120rem] mx-auto">
-        <div className="grid grid-cols-1 lg:grid-cols-12 gap-12 items-start">
-          <div className="lg:col-span-4">
-            <AnimatedReveal>
-              <div className="w-full h-[1px] bg-primary/20 mb-8" />
-              <h2 className="font-heading text-4xl lg:text-5xl text-primary leading-tight">
-                Curating the <br/>
-                <span className="italic text-secondary-foreground/70">Extraordinary</span>
-              </h2>
-            </AnimatedReveal>
-          </div>
-          <div className="lg:col-span-8 lg:pl-12">
-            <AnimatedReveal delay={200}>
-              <p className="text-2xl lg:text-3xl leading-relaxed text-primary/90 font-light">
-                <span className="text-6xl float-left mr-4 mt-[-10px] font-heading text-primary">W</span>
-                e believe that every object in your home should tell a story. Our platform connects you with the world's most exceptional independent retailers, bringing global craftsmanship directly to your doorstep. From Kyoto ceramics to Scandinavian textiles, discover the hands that shape our world.
-              </p>
-              <div className="mt-12 grid grid-cols-2 md:grid-cols-4 gap-8 border-t border-primary/10 pt-8">
-                <div className="text-center lg:text-left">
-                  <h3 className="font-heading text-4xl text-primary mb-1">{stores.length}+</h3>
-                  <p className="text-sm uppercase tracking-widest text-primary/60">Curated Stores</p>
-                </div>
-                <div className="text-center lg:text-left">
-                  <h3 className="font-heading text-4xl text-primary mb-1">{countries.length}</h3>
-                  <p className="text-sm uppercase tracking-widest text-primary/60">Countries</p>
-                </div>
-                <div className="text-center lg:text-left">
-                  <h3 className="font-heading text-4xl text-primary mb-1">{categories.length}</h3>
-                  <p className="text-sm uppercase tracking-widest text-primary/60">Categories</p>
-                </div>
-                <div className="text-center lg:text-left">
-                  <h3 className="font-heading text-4xl text-primary mb-1">∞</h3>
-                  <p className="text-sm uppercase tracking-widest text-primary/60">Possibilities</p>
-                </div>
-              </div>
-            </AnimatedReveal>
-          </div>
-        </div>
-      </section>
-
-      {/* --- FEATURED SHOWCASE: Horizontal Scroll / Highlight --- */}
-      {featuredStores.length > 0 && (
-        <section className="w-full bg-secondary/20 py-24 overflow-hidden">
-          <div className="max-w-[120rem] mx-auto px-6 lg:px-12 mb-12 flex justify-between items-end">
-            <AnimatedReveal>
-              <h2 className="font-heading text-4xl text-primary">Editor's Selection</h2>
-            </AnimatedReveal>
-            <AnimatedReveal delay={100}>
-              <div className="hidden md:flex gap-2">
-                <div className="w-12 h-[1px] bg-primary self-center" />
-                <span className="text-sm uppercase tracking-widest text-primary">Top Picks</span>
-              </div>
-            </AnimatedReveal>
-          </div>
-          
-          <div className="max-w-[120rem] mx-auto px-6 lg:px-12">
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
-              {featuredStores.map((store, idx) => (
-                <AnimatedReveal key={store._id} delay={idx * 150}>
-                  <div 
-                    className="group cursor-pointer relative"
-                    onClick={() => setSelectedStore(store)}
-                  >
-                    <div className="aspect-[4/5] overflow-hidden mb-6 relative">
-                      <div className="absolute inset-0 bg-primary/0 group-hover:bg-primary/10 transition-colors z-10 duration-500" />
-                      {store.storeLogo ? (
-                        <Image
-                          src={store.storeLogo}
-                          alt={store.storeName || 'Store Image'}
-                          width={600}
-                          className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-110"
-                        />
-                      ) : (
-                        <div className="w-full h-full bg-secondary flex items-center justify-center">
-                          <ShoppingBag className="w-12 h-12 text-primary/20" />
-                        </div>
-                      )}
-                      <div className="absolute top-4 right-4 z-20 opacity-0 group-hover:opacity-100 transition-opacity duration-300">
-                        <div className="bg-background/90 backdrop-blur rounded-full p-3 shadow-lg">
-                          <ArrowRight className="w-5 h-5 text-primary" />
-                        </div>
-                      </div>
-                    </div>
-                    <h3 className="font-heading text-2xl text-primary mb-2 group-hover:underline decoration-1 underline-offset-4">
-                      {store.storeName}
-                    </h3>
-                    <p className="text-primary/60 line-clamp-2 text-sm leading-relaxed max-w-xs">
-                      {store.description}
-                    </p>
-                  </div>
-                </AnimatedReveal>
-              ))}
-            </div>
-          </div>
-        </section>
-      )}
-
-      <Marquee text="Global • Artisan • Curated • Quality • Timeless • Design" />
-
-      {/* --- MAIN COLLECTION: Sticky Filter & Grid --- */}
-      <section id="collection" className="relative min-h-screen bg-background py-24">
-        <div className="max-w-[120rem] mx-auto px-6 lg:px-12">
-          
-          {/* Header */}
-          <div className="text-center mb-20">
-            <AnimatedReveal>
-              <span className="text-sm uppercase tracking-[0.2em] text-primary/60 mb-4 block">The Collection</span>
-              <h2 className="font-heading text-5xl lg:text-7xl text-primary mb-6">Global Directory</h2>
-              <div className="w-24 h-1 bg-primary mx-auto" />
-            </AnimatedReveal>
           </div>
 
-          {/* Sticky Filter Bar */}
-          <div className="sticky top-4 z-40 mb-16">
-            <div className="bg-background/80 backdrop-blur-md border border-primary/10 shadow-xl rounded-2xl p-4 lg:p-6">
-              <div className="flex flex-col lg:flex-row gap-4 items-center justify-between">
-                
-                {/* Search */}
-                <div className="relative w-full lg:w-1/3">
+          {/* Search & Filter Form */}
+          <div className="bg-white rounded-2xl shadow-lg p-6 lg:p-8 border border-primary/10">
+            <div className="grid grid-cols-1 lg:grid-cols-4 gap-4 items-end">
+              {/* Search Input */}
+              <div className="lg:col-span-2">
+                <label className="block text-sm font-semibold text-primary mb-2">Search Stores</label>
+                <div className="relative">
                   <Search className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-primary/40" />
                   <Input 
                     placeholder="Search by name or keyword..." 
                     value={searchQuery}
                     onChange={(e) => setSearchQuery(e.target.value)}
-                    className="pl-12 bg-secondary/10 border-transparent focus:bg-background focus:border-primary/20 h-12 rounded-xl font-paragraph transition-all"
+                    className="pl-12 h-12 rounded-lg border-primary/20 focus:border-primary focus:ring-primary/20 font-paragraph"
                   />
                 </div>
+              </div>
 
-                {/* Filters */}
-                <div className="flex gap-4 w-full lg:w-auto overflow-x-auto pb-2 lg:pb-0 no-scrollbar">
-                  <Select value={selectedCategory} onValueChange={setSelectedCategory}>
-                    <SelectTrigger className="w-[180px] h-12 rounded-xl border-primary/10 bg-secondary/10 hover:bg-secondary/20 transition-colors">
-                      <div className="flex items-center gap-2">
-                        <Filter className="w-4 h-4 opacity-50" />
-                        <SelectValue placeholder="Category" />
-                      </div>
-                    </SelectTrigger>
-                    <SelectContent>
-                      <SelectItem value="all">All Categories</SelectItem>
-                      {categories.map(c => <SelectItem key={c} value={c!}>{c}</SelectItem>)}
-                    </SelectContent>
-                  </Select>
+              {/* Category Filter */}
+              <div>
+                <label className="block text-sm font-semibold text-primary mb-2">Category</label>
+                <Select value={selectedCategory} onValueChange={setSelectedCategory}>
+                  <SelectTrigger className="h-12 rounded-lg border-primary/20 focus:border-primary focus:ring-primary/20">
+                    <SelectValue placeholder="All Categories" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="all">All Categories</SelectItem>
+                    {categories.map(c => <SelectItem key={c} value={c!}>{c}</SelectItem>)}
+                  </SelectContent>
+                </Select>
+              </div>
 
-                  <Select value={selectedCountry} onValueChange={setSelectedCountry}>
-                    <SelectTrigger className="w-[180px] h-12 rounded-xl border-primary/10 bg-secondary/10 hover:bg-secondary/20 transition-colors">
-                      <div className="flex items-center gap-2">
-                        <Globe className="w-4 h-4 opacity-50" />
-                        <SelectValue placeholder="Country" />
-                      </div>
-                    </SelectTrigger>
-                    <SelectContent>
-                      <SelectItem value="all">All Countries</SelectItem>
-                      {countries.map(c => <SelectItem key={c} value={c!}>{c}</SelectItem>)}
-                    </SelectContent>
-                  </Select>
-                  
-                  <Button 
-                    variant="outline" 
-                    onClick={() => {
-                      setSearchQuery('');
-                      setSelectedCategory('all');
-                      setSelectedCountry('all');
-                    }}
-                    className="h-12 px-6 rounded-xl border-primary/10 hover:bg-destructive/5 hover:text-destructive hover:border-destructive/20 transition-colors"
-                  >
-                    Reset
-                  </Button>
-                </div>
+              {/* Country Filter */}
+              <div>
+                <label className="block text-sm font-semibold text-primary mb-2">Country</label>
+                <Select value={selectedCountry} onValueChange={setSelectedCountry}>
+                  <SelectTrigger className="h-12 rounded-lg border-primary/20 focus:border-primary focus:ring-primary/20">
+                    <SelectValue placeholder="All Countries" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="all">All Countries</SelectItem>
+                    {countries.map(c => <SelectItem key={c} value={c!}>{c}</SelectItem>)}
+                  </SelectContent>
+                </Select>
+              </div>
+
+              {/* Reset Button */}
+              <div className="flex gap-2">
+                <Button 
+                  onClick={() => {
+                    setSearchQuery('');
+                    setSelectedCategory('all');
+                    setSelectedCountry('all');
+                  }}
+                  variant="outline"
+                  className="h-12 rounded-lg border-primary/20 hover:bg-primary/5 text-primary flex-1"
+                >
+                  Reset
+                </Button>
               </div>
             </div>
           </div>
-
-          {/* Results Grid */}
-          {isLoading ? (
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
-              {[1, 2, 3, 4, 5, 6].map((i) => (
-                <div key={i} className="h-[400px] bg-secondary/10 animate-pulse rounded-xl" />
-              ))}
-            </div>
-          ) : filteredStores.length === 0 ? (
-            <div className="text-center py-32 bg-secondary/5 rounded-3xl border border-dashed border-primary/20">
-              <ShoppingBag className="w-16 h-16 text-primary/20 mx-auto mb-4" />
-              <h3 className="font-heading text-2xl text-primary mb-2">No stores found</h3>
-              <p className="text-primary/60">Try adjusting your filters or search terms.</p>
-            </div>
-          ) : (
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-x-8 gap-y-16">
-              {filteredStores.map((store, index) => (
-                <AnimatedReveal key={store._id} delay={index % 4 * 100}>
-                  <div 
-                    className="group flex flex-col h-full cursor-pointer"
-                    onClick={() => setSelectedStore(store)}
-                  >
-                    {/* Card Image */}
-                    <div className="relative aspect-square overflow-hidden rounded-2xl bg-secondary/20 mb-6 shadow-sm group-hover:shadow-xl transition-all duration-500">
-                      <div className="absolute inset-0 bg-black/0 group-hover:bg-black/10 z-10 transition-colors duration-500" />
-                      {store.storeLogo ? (
-                        <Image
-                          src={store.storeLogo}
-                          alt={store.storeName || 'Store'}
-                          width={500}
-                          className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-105"
-                        />
-                      ) : (
-                        <div className="w-full h-full flex items-center justify-center">
-                          <span className="font-heading text-4xl text-primary/20">{store.storeName?.charAt(0)}</span>
-                        </div>
-                      )}
-                      
-                      {/* Quick Actions Overlay */}
-                      <div className="absolute bottom-0 left-0 right-0 p-4 translate-y-full group-hover:translate-y-0 transition-transform duration-300 z-20">
-                        <Button className="w-full bg-background/95 text-primary hover:bg-primary hover:text-primary-foreground shadow-lg rounded-xl">
-                          View Details
-                        </Button>
-                      </div>
-
-                      {/* Badges */}
-                      <div className="absolute top-4 left-4 z-20 flex flex-col gap-2">
-                        {store.internationalShipping && (
-                          <Badge className="bg-background/90 text-primary hover:bg-background shadow-sm backdrop-blur-sm border-none">
-                            Global Shipping
-                          </Badge>
-                        )}
-                      </div>
-                    </div>
-
-                    {/* Card Content */}
-                    <div className="flex-1 flex flex-col">
-                      <div className="flex justify-between items-start mb-2">
-                        <h3 className="font-heading text-xl font-bold text-primary group-hover:text-linkcolor transition-colors">
-                          {store.storeName}
-                        </h3>
-                        {store.countryOfOrigin && (
-                          <span className="text-xs font-bold uppercase tracking-wider text-primary/40 border border-primary/10 px-2 py-1 rounded-md">
-                            {store.countryOfOrigin}
-                          </span>
-                        )}
-                      </div>
-                      <p className="text-primary/70 text-sm leading-relaxed line-clamp-2 mb-4 flex-1">
-                        {store.description}
-                      </p>
-                      <div className="pt-4 border-t border-primary/5 flex justify-between items-center">
-                        <span className="text-xs uppercase tracking-widest text-primary/50 font-semibold">
-                          {store.category || 'General'}
-                        </span>
-                        <ArrowRight className="w-4 h-4 text-primary/30 group-hover:text-primary group-hover:translate-x-1 transition-all" />
-                      </div>
-                    </div>
-                  </div>
-                </AnimatedReveal>
-              ))}
-            </div>
-          )}
         </div>
       </section>
 
-      {/* --- VISUAL BREATHER: Full Bleed Image --- */}
-      <section className="relative w-full h-[80vh] overflow-hidden">
-        <ParallaxImage 
-          src="https://static.wixstatic.com/media/65c5e7_fd3eb7f8489c43d19efcb52c6254d5ee~mv2.png?originWidth=1920&originHeight=1280"
-          alt="Abstract texture of natural materials"
-          className="w-full h-full"
-        />
-        <div className="absolute inset-0 bg-primary/20 mix-blend-multiply" />
-        <div className="absolute inset-0 flex items-center justify-center">
-          <div className="bg-background/90 backdrop-blur-md p-12 lg:p-20 max-w-4xl text-center mx-6 shadow-2xl">
-            <h2 className="font-heading text-4xl lg:text-6xl text-primary mb-6">
-              "Quality is not an act, it is a habit."
-            </h2>
-            <p className="font-paragraph text-lg text-primary/60 italic">
-              — Aristotle
-            </p>
+      {/* --- STATS SECTION --- */}
+      <section className="py-16 px-6 lg:px-12 bg-white border-b border-primary/10">
+        <div className="max-w-[100rem] mx-auto">
+          <div className="grid grid-cols-2 md:grid-cols-4 gap-8">
+            <div className="text-center">
+              <div className="text-4xl font-heading text-primary mb-2">{stores.length}</div>
+              <p className="text-sm uppercase tracking-widest text-foreground/60 font-semibold">Total Stores</p>
+            </div>
+            <div className="text-center">
+              <div className="text-4xl font-heading text-secondary mb-2">{countries.length}</div>
+              <p className="text-sm uppercase tracking-widest text-foreground/60 font-semibold">Countries</p>
+            </div>
+            <div className="text-center">
+              <div className="text-4xl font-heading text-primary mb-2">{categories.length}</div>
+              <p className="text-sm uppercase tracking-widest text-foreground/60 font-semibold">Categories</p>
+            </div>
+            <div className="text-center">
+              <div className="text-4xl font-heading text-secondary mb-2">{filteredStores.length}</div>
+              <p className="text-sm uppercase tracking-widest text-foreground/60 font-semibold">Results</p>
+            </div>
           </div>
+        </div>
+      </section>
+
+      {/* --- STORES TABLE/GRID --- */}
+      <section id="collection" className="py-24 px-6 lg:px-12 bg-background">
+        <div className="max-w-[100rem] mx-auto">
+          {/* Results Table */}
+          {isLoading ? (
+            <div className="space-y-4">
+              {[1, 2, 3, 4, 5].map((i) => (
+                <div key={i} className="h-20 bg-primary/5 animate-pulse rounded-lg" />
+              ))}
+            </div>
+          ) : filteredStores.length === 0 ? (
+            <div className="text-center py-20 bg-primary/5 rounded-xl border border-dashed border-primary/20">
+              <Globe className="w-16 h-16 text-primary/20 mx-auto mb-4" />
+              <h3 className="font-heading text-2xl text-primary mb-2">No stores found</h3>
+              <p className="text-foreground/60">Try adjusting your filters or search terms.</p>
+            </div>
+          ) : (
+            <div className="overflow-x-auto">
+              <table className="w-full">
+                <thead>
+                  <tr className="border-b-2 border-primary/20">
+                    <th className="text-left py-4 px-4 font-heading text-primary">Store Name</th>
+                    <th className="text-left py-4 px-4 font-heading text-primary">Category</th>
+                    <th className="text-left py-4 px-4 font-heading text-primary">Country</th>
+                    <th className="text-left py-4 px-4 font-heading text-primary">Shipping</th>
+                    <th className="text-left py-4 px-4 font-heading text-primary">Action</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {filteredStores.map((store) => (
+                    <motion.tr 
+                      key={store._id}
+                      className="border-b border-primary/10 hover:bg-primary/5 transition-colors cursor-pointer"
+                      onClick={() => setSelectedStore(store)}
+                      whileHover={{ scale: 1.01 }}
+                    >
+                      <td className="py-4 px-4">
+                        <div>
+                          <p className="font-semibold text-primary">{store.storeName}</p>
+                          <p className="text-sm text-foreground/60 line-clamp-1">{store.description}</p>
+                        </div>
+                      </td>
+                      <td className="py-4 px-4">
+                        <Badge variant="outline" className="border-primary/20 text-primary bg-primary/5">
+                          {store.category || 'General'}
+                        </Badge>
+                      </td>
+                      <td className="py-4 px-4">
+                        <div className="flex items-center gap-2 text-foreground/70">
+                          <MapPin className="w-4 h-4 text-secondary" />
+                          {store.countryOfOrigin || 'N/A'}
+                        </div>
+                      </td>
+                      <td className="py-4 px-4">
+                        {store.internationalShipping ? (
+                          <div className="flex items-center gap-2 text-secondary font-semibold">
+                            <Check className="w-5 h-5" />
+                            Global
+                          </div>
+                        ) : (
+                          <span className="text-foreground/40">Local</span>
+                        )}
+                      </td>
+                      <td className="py-4 px-4">
+                        <Button 
+                          size="sm"
+                          className="bg-primary text-white hover:bg-primary/90 rounded-lg"
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            setSelectedStore(store);
+                          }}
+                        >
+                          View
+                          <ArrowRight className="w-4 h-4 ml-2" />
+                        </Button>
+                      </td>
+                    </motion.tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
+          )}
         </div>
       </section>
 
@@ -489,7 +265,7 @@ export default function HomePage() {
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
             exit={{ opacity: 0 }}
-            className="fixed inset-0 z-50 flex items-center justify-center p-4 lg:p-8 bg-primary/60 backdrop-blur-sm"
+            className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-primary/40 backdrop-blur-sm"
             onClick={() => setSelectedStore(null)}
           >
             <motion.div
@@ -497,105 +273,102 @@ export default function HomePage() {
               animate={{ y: 0, opacity: 1, scale: 1 }}
               exit={{ y: 100, opacity: 0, scale: 0.95 }}
               transition={{ type: "spring", damping: 25, stiffness: 300 }}
-              className="bg-background w-full max-w-6xl max-h-[90vh] overflow-y-auto rounded-3xl shadow-2xl flex flex-col lg:flex-row overflow-hidden"
+              className="bg-white w-full max-w-2xl max-h-[90vh] overflow-y-auto rounded-2xl shadow-2xl p-8"
               onClick={(e) => e.stopPropagation()}
             >
-              {/* Modal Image Side */}
-              <div className="w-full lg:w-1/2 h-[300px] lg:h-auto relative bg-secondary/20">
-                {selectedStore.storeLogo ? (
-                  <Image
-                    src={selectedStore.storeLogo}
-                    alt={selectedStore.storeName || 'Store Detail'}
-                    width={800}
-                    className="w-full h-full object-cover"
-                  />
-                ) : (
-                  <div className="w-full h-full flex items-center justify-center">
-                    <ShoppingBag className="w-32 h-32 text-primary/20" />
-                  </div>
-                )}
+              {/* Close Button */}
+              <div className="flex justify-between items-start mb-6">
+                <h2 className="font-heading text-4xl text-primary">
+                  {selectedStore.storeName}
+                </h2>
                 <Button
                   variant="ghost"
                   size="icon"
-                  className="absolute top-4 left-4 bg-background/50 hover:bg-background rounded-full lg:hidden"
-                  onClick={() => setSelectedStore(null)}
-                >
-                  <X className="w-5 h-5" />
-                </Button>
-              </div>
-
-              {/* Modal Content Side */}
-              <div className="w-full lg:w-1/2 p-8 lg:p-16 flex flex-col relative">
-                <Button
-                  variant="ghost"
-                  size="icon"
-                  className="absolute top-6 right-6 hidden lg:flex hover:bg-secondary/20 rounded-full"
+                  className="hover:bg-primary/10 rounded-full"
                   onClick={() => setSelectedStore(null)}
                 >
                   <X className="w-6 h-6 text-primary" />
                 </Button>
+              </div>
 
-                <div className="mb-8">
-                  <div className="flex items-center gap-3 mb-4">
-                    <Badge variant="outline" className="rounded-full px-4 py-1 border-primary/20 text-primary/60 uppercase tracking-widest text-xs">
-                      {selectedStore.category || 'Retailer'}
+              {/* Store Details */}
+              <div className="space-y-6">
+                {/* Category & Shipping */}
+                <div className="flex flex-wrap gap-3">
+                  <Badge variant="outline" className="border-primary/20 text-primary bg-primary/5">
+                    {selectedStore.category || 'Retailer'}
+                  </Badge>
+                  {selectedStore.internationalShipping && (
+                    <Badge className="bg-secondary text-white border-none">
+                      Global Shipping Available
                     </Badge>
-                    {selectedStore.internationalShipping && (
-                      <Badge className="rounded-full px-4 py-1 bg-secondary text-secondary-foreground hover:bg-secondary/80 border-none uppercase tracking-widest text-xs">
-                        Global Shipping
-                      </Badge>
-                    )}
-                  </div>
-                  <h2 className="font-heading text-5xl lg:text-6xl text-primary mb-6 leading-tight">
-                    {selectedStore.storeName}
-                  </h2>
-                  <div className="flex items-center gap-2 text-primary/60 mb-8">
-                    <MapPin className="w-5 h-5" />
-                    <span className="text-lg">{selectedStore.countryOfOrigin || 'Worldwide'}</span>
-                  </div>
-                  <p className="font-paragraph text-xl text-primary/80 leading-relaxed">
+                  )}
+                </div>
+
+                {/* Location */}
+                <div className="flex items-center gap-3 text-lg">
+                  <MapPin className="w-5 h-5 text-secondary" />
+                  <span className="text-foreground/80">{selectedStore.countryOfOrigin || 'Worldwide'}</span>
+                </div>
+
+                {/* Description */}
+                <div>
+                  <h3 className="font-heading text-lg text-primary mb-2">About</h3>
+                  <p className="text-foreground/70 leading-relaxed">
                     {selectedStore.description}
                   </p>
                 </div>
 
-                <div className="mt-auto pt-8 border-t border-primary/10">
-                  <div className="grid grid-cols-2 gap-8 mb-8">
-                    <div>
-                      <h4 className="font-heading text-lg text-primary mb-1">Established</h4>
-                      <p className="text-primary/60">2024</p>
-                    </div>
-                    <div>
-                      <h4 className="font-heading text-lg text-primary mb-1">Rating</h4>
-                      <div className="flex gap-1">
-                        {[1,2,3,4,5].map(i => <Star key={i} className="w-4 h-4 fill-primary text-primary" />)}
-                      </div>
-                    </div>
+                {/* Store Info Grid */}
+                <div className="grid grid-cols-2 gap-6 py-6 border-y border-primary/10">
+                  <div>
+                    <p className="text-sm uppercase tracking-widest text-foreground/60 font-semibold mb-1">Category</p>
+                    <p className="text-lg text-primary font-semibold">{selectedStore.category || 'General'}</p>
                   </div>
+                  <div>
+                    <p className="text-sm uppercase tracking-widest text-foreground/60 font-semibold mb-1">Shipping</p>
+                    <p className="text-lg text-primary font-semibold">
+                      {selectedStore.internationalShipping ? 'International' : 'Local'}
+                    </p>
+                  </div>
+                </div>
 
-                  <div className="flex gap-4">
-                    {selectedStore.websiteUrl && (
-                      <Button 
-                        className="flex-1 h-14 text-lg bg-primary text-primary-foreground hover:bg-primary/90 rounded-xl"
-                        onClick={() => window.open(selectedStore.websiteUrl, '_blank')}
-                      >
-                        Visit Official Store
-                        <ExternalLink className="ml-2 w-5 h-5" />
-                      </Button>
-                    )}
+                {/* Action Buttons */}
+                <div className="flex gap-3 pt-4">
+                  {selectedStore.websiteUrl && (
                     <Button 
-                      variant="outline"
-                      className="h-14 px-8 text-lg border-primary/20 hover:bg-secondary/20 rounded-xl"
-                      onClick={() => setSelectedStore(null)}
+                      className="flex-1 h-12 bg-primary text-white hover:bg-primary/90 rounded-lg font-semibold"
+                      onClick={() => window.open(selectedStore.websiteUrl, '_blank')}
                     >
-                      Close
+                      Visit Store
+                      <ExternalLink className="ml-2 w-4 h-4" />
                     </Button>
-                  </div>
+                  )}
+                  <Button 
+                    variant="outline"
+                    className="flex-1 h-12 border-primary/20 text-primary hover:bg-primary/5 rounded-lg font-semibold"
+                    onClick={() => setSelectedStore(null)}
+                  >
+                    Close
+                  </Button>
                 </div>
               </div>
             </motion.div>
           </motion.div>
         )}
       </AnimatePresence>
+
+      {/* --- VISUAL BREAKER: Full Bleed Section --- */}
+      <section className="relative w-full py-20 px-6 lg:px-12 bg-gradient-to-r from-primary/10 to-secondary/10 border-y border-primary/10">
+        <div className="max-w-[100rem] mx-auto text-center">
+          <h2 className="font-heading text-4xl lg:text-5xl text-primary mb-4">
+            Discover Global Retailers
+          </h2>
+          <p className="text-lg text-foreground/70 max-w-2xl mx-auto">
+            Browse our curated collection of exceptional online stores from around the world. Find exactly what you're looking for with our advanced filtering system.
+          </p>
+        </div>
+      </section>
 
       <Footer />
     </div>
